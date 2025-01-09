@@ -1,0 +1,89 @@
+---
+
+import DefaultLayout from "../../layouts/Default.astro";
+
+import { CutCornerButton } from "../../components/CutCornerButton";
+import { Hexagon } from "../../components/Hexagon";
+import { Card } from "../../components/Card";
+import { Tag } from "../../components/Tag";
+
+import { getCollection } from 'astro:content';
+
+// Fetch and sort posts
+const posts = (await getCollection('blog')).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+const latestPost = posts[0];
+
+// Helper function to get colors for categories
+const getPostColorFromCategory = (category) => {
+  const colors = {
+    Tech: 'bg-blue-500 text-blue-100',
+    Lifestyle: 'bg-green-500 text-green-100',
+    Business: 'bg-yellow-500 text-yellow-100',
+    Education: 'bg-purple-500 text-purple-100',
+    Default: 'bg-gray-500 text-gray-100',
+  };
+  return colors[category] || colors.Default;
+};
+---
+
+<DefaultLayout>
+  <!-- Header Section -->
+ 
+
+  <!-- Latest Posts Section -->
+  <section class="py-60 relative overflow-x-clip">
+    <!-- Hexagon Backgrounds -->
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <Hexagon size={800} client:load duration={30} />
+    </div>
+    <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+      <Hexagon size={1200} client:load reverse duration={50} />
+    </div>
+
+    <div class="container">
+      <div class="max-w-3xl mx-auto text-center">
+        <p class="uppercase font-extrabold text-zinc-500 tracking-wider">
+          Latest Posts
+        </p>
+        <h1 class="font-heading font-black md:text-6xl text-7xl mt-4">
+          {latestPost.data.title}
+        </h1>
+        <p class="text-2xl mt-6 text-zinc-400 max-w-xl mx-auto">
+          {latestPost.data.description}
+        </p>
+        <div class="flex justify-center mt-10">
+          <a href={`/blog/${latestPost.slug}`}>
+            <CutCornerButton>Read More</CutCornerButton>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Blog Posts Grid Section -->
+  <section class="py-20">
+    <div class="container">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        {posts.map(({ data: { category, title, description }, slug }, index) => (
+          <div
+            key={slug}
+            class={`flex flex-col gap-6 motion-safe:animate-fadeIn`}
+            style={{ animationDelay: `${index * 0.2}s` }}
+          >
+            <a href={`/blog/${slug}`}>
+              <Card buttonText="Read More" color={getPostColorFromCategory(category)}>
+                <Tag color={getPostColorFromCategory(category)}>{category}</Tag>
+                <h2 class="font-heading font-black text-3xl mt-4">{title}</h2>
+                <p class="text-lg mt-6 text-zinc-400">{description}</p>
+              </Card>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+ 
+</DefaultLayout>
